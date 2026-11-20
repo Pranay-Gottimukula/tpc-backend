@@ -56,32 +56,32 @@ export class RecruiterFeedbackModel extends Model<RecruiterFeedbackModel> {
   season: SeasonModel;
 
   /* ---------- Ratings ---------- */
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   communicationPromptness: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   queryHandling: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   logisticsArrangement: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   studentFamiliarity: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   studentCommunication: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   resumeQuality: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   studentPreparedness: number;
 
-  @Column(sequelize.INTEGER)
+  @Column({ allowNull: false, type: sequelize.INTEGER, validate: { min: 1, max: 5 } })
   disciplineAndPunctuality: number;
 
   /* ---------- Other ---------- */
-  @Column(sequelize.STRING)
+  @Column({ allowNull: false, type: sequelize.STRING })
   rightTimeToContact: string;
 
   @Column(sequelize.TEXT)

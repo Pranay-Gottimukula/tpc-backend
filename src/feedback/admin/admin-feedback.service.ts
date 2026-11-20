@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { FindOptions } from "sequelize";
 import { parseFilter, parseOrder, parsePagesize } from "src/utils";
 import {
@@ -82,14 +82,15 @@ export class AdminFeedbackService {
         {
           model: RecruiterModel,
           as: "recruiter",
-          include: [{ model: UserModel, as: "user" }],
+          attributes: ["designation"],
+          include: [{ model: UserModel, as: "user", attributes: ["name", "email"] }],
         },
-        { model: CompanyModel, as: "company" },
-        { model: SeasonModel, as: "season" },
+        { model: CompanyModel, as: "company", attributes: ["name"] },
+        { model: SeasonModel, as: "season", attributes: ["year", "type"] },
       ],
     });
 
-    if (!fb) return null;
+    if (!fb) throw new NotFoundException("Feedback not found");
 
     return fb.get({ plain: true });
   }

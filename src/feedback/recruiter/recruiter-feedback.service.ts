@@ -2,8 +2,11 @@ import {
   Inject,
   Injectable,
   ForbiddenException,
+  ConflictException,
+  Logger,
+  NotFoundException,
 } from "@nestjs/common";
-import { Op } from "sequelize";
+import { Op, UniqueConstraintError } from "sequelize";
 import { CreateRecruiterFeedbackDto } from "./dtos/post.dto";
 import { RecruiterFeedbackSeasonDto } from "./dtos/get.dto";
 
@@ -18,9 +21,12 @@ import {
 
 import { EmailService, getHtmlContent } from "../../services/EmailService";
 import path from "path";
+import { RoleEnum } from "../../enums";
 
 @Injectable()
 export class RecruiterFeedbackService {
+  private readonly logger = new Logger(RecruiterFeedbackService.name);
+
   constructor(
     @Inject(RECRUITER_FEEDBACK_DAO)
     private readonly feedbackDao: any,
@@ -44,7 +50,7 @@ export class RecruiterFeedbackService {
   ) {}
 
   // ======================================================
-  // POST: Submit Recruiter Feedback (UNCHANGED LOGIC)
+  // POST: Submit Recruiter Feedback
   // ======================================================
   async submitFeedback(body: CreateRecruiterFeedbackDto, userId: string) {
     const recruiter = await this.recruiterDao.findOne({
@@ -56,45 +62,58 @@ export class RecruiterFeedbackService {
       throw new ForbiddenException("Only recruiters can submit feedback");
     }
 
-    // BEFORE creating feedback
-    const existingFeedback = await this.feedbackDao.findOne({
-      where: {
-        recruiterId: recruiter.id,
-        seasonId: body.seasonId,
-      },
-    });
-
-    if (existingFeedback) {
-      throw new ForbiddenException(
-        "Feedback already submitted for this season"
-      );
-    }
-
     const company = await this.companyDao.findByPk(recruiter.companyId);
     const season = await this.seasonDao.findByPk(body.seasonId);
 
-    const feedback = await this.feedbackDao.create({
-      recruiterId: recruiter.id,
-      companyId: recruiter.companyId,
-      seasonId: body.seasonId,
+    if (!season) {
+      throw new NotFoundException("Season not found");
+    }
 
-      communicationPromptness: body.communicationPromptness,
-      queryHandling: body.queryHandling,
-      logisticsArrangement: body.logisticsArrangement,
-      studentFamiliarity: body.studentFamiliarity,
-      studentCommunication: body.studentCommunication,
-      resumeQuality: body.resumeQuality,
-      studentPreparedness: body.studentPreparedness,
-      disciplineAndPunctuality: body.disciplineAndPunctuality,
-
-      rightTimeToContact: body.rightTimeToContact,
-      recommendations: body.recommendations,
+    const job = await this.jobDao.findOne({
+      where: { companyId: recruiter.companyId, seasonId: body.seasonId },
     });
 
-    // ---------- Admin Email (non-blocking) ----------
+    if (!job) {
+      throw new ForbiddenException(
+        "Recruiter is not eligible to submit feedback for this season"
+      );
+    }
+
+    let feedback;
+    try {
+      feedback = await this.feedbackDao.create({
+        recruiterId: recruiter.id,
+        companyId: recruiter.companyId,
+        seasonId: body.seasonId,
+
+        communicationPromptness: body.communicationPromptness,
+        queryHandling: body.queryHandling,
+        logisticsArrangement: body.logisticsArrangement,
+        studentFamiliarity: body.studentFamiliarity,
+        studentCommunication: body.studentCommunication,
+        resumeQuality: body.resumeQuality,
+        studentPreparedness: body.studentPreparedness,
+        disciplineAndPunctuality: body.disciplineAndPunctuality,
+
+        rightTimeToContact: body.rightTimeToContact,
+        recommendations: body.recommendations,
+      });
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        throw new ConflictException("Feedback already submitted for this season");
+      }
+      throw error;
+    }
+
+    await this.notifyAdmins(feedback, recruiter, company, season);
+
+    return feedback;
+  }
+
+  private async notifyAdmins(feedback: any, recruiter: any, company: any, season: any) {
     try {
       const admins = await this.userDao.findAll({
-        where: { role: "ADMIN" },
+        where: { role: RoleEnum.ADMIN },
         attributes: ["email"],
       });
 
@@ -107,24 +126,24 @@ export class RecruiterFeedbackService {
       );
 
       const html = getHtmlContent(templatePath, {
-        companyName: company?.name ?? "Company",
-        season: `${season?.year} ${season?.type}`,
-        officialName: recruiter.user?.name,
-        designation: recruiter.designation,
-        officialEmail: recruiter.user?.email,
-        url: `${process.env.FRONTEND_URL}/admin/feedback/${body.seasonId}/${company.id}`,
+        companyName: company?.name ?? "",
+        season: `${season?.year ?? ""} ${season?.type ?? ""}`,
+        officialName: recruiter.user?.name ?? "",
+        designation: recruiter.designation ?? "",
+        officialEmail: recruiter.user?.email ?? "",
+        url: `${process.env.FRONTEND_URL ?? ""}/admin/feedback/${feedback.id}`,
       });
 
       await this.emailService.sendEmail({
         recepients,
-        subject: `Recruiter Feedback Submitted by ${company?.name}`,
+        subject: `Recruiter Feedback Submitted by ${company?.name ?? ""}`,
         html,
       });
     } catch (err) {
-      console.error("Feedback email failed:", err.message);
+      this.logger.error(
+        `Feedback email failed: ${err instanceof Error ? err.message : String(err)}`
+      );
     }
-
-    return feedback;
   }
 
   // ======================================================

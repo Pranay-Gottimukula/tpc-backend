@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from "@nestjs/common";
 import { AdminFeedbackService } from "./admin-feedback.service";
 import { AuthGuard } from "@nestjs/passport";
 import { RoleGuard } from "src/auth/roleGaurd";
@@ -16,7 +16,7 @@ export class AdminFeedbackController {
   }
 
   @Get(":id")
-  async getFeedback(@Param("id") id: string) {
+  async getFeedback(@Param("id", ParseUUIDPipe) id: string) {
     return this.service.getFeedbackById(id);
   }
 }

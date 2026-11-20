@@ -47,32 +47,41 @@ module.exports = {
       /* ---------- Ratings ---------- */
       communicationPromptness: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       queryHandling: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       logisticsArrangement: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       studentFamiliarity: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       studentCommunication: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       resumeQuality: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       studentPreparedness: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
       disciplineAndPunctuality: {
         type: Sequelize.INTEGER,
+        allowNull: false,
       },
 
       /* ---------- Other ---------- */
       rightTimeToContact: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       recommendations: {
         type: Sequelize.TEXT,
@@ -96,6 +105,26 @@ module.exports = {
       type: "unique",
       name: "unique_recruiter_feedback_per_season",
     });
+
+    const ratingFields = [
+      "communicationPromptness",
+      "queryHandling",
+      "logisticsArrangement",
+      "studentFamiliarity",
+      "studentCommunication",
+      "resumeQuality",
+      "studentPreparedness",
+      "disciplineAndPunctuality",
+    ];
+
+    for (const field of ratingFields) {
+      await queryInterface.addConstraint("RecruiterFeedback", {
+        fields: [field],
+        type: "check",
+        where: { [field]: { [Sequelize.Op.between]: [1, 5] } },
+        name: `check_recruiter_feedback_${field}_range`,
+      });
+    }
   },
 
   async down(queryInterface) {

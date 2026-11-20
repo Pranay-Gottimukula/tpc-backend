@@ -60,16 +60,14 @@ export class EmailService {
       html,
     };
 
-    const result = await transport.sendMail(options, (error, info) => {
-      if (error) {
-        this.logger.error("Error sending email1:", error);
-        throw new HttpException("Error sending email", 500);
-      } else {
-        this.logger.log("Email sent:", info.response);
-      }
-    });
-
-    return result;
+    try {
+      const result = await transport.sendMail(options);
+      this.logger.log(`Email sent: ${result.response}`);
+      return result;
+    } catch (error) {
+      this.logger.error("Error sending email", error);
+      throw new HttpException("Error sending email", 500);
+    }
   }
   private logger = new Logger(EmailService.name);
 
