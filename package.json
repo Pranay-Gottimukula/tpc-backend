@@ -19,6 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "upload:data": "ts-node src/upload-data.ts",
+    "upload:ppo": "ts-node src/upload-ppo-data.ts",
+    "upload:ppo:seasons": "ts-node src/upload-ppo-data.ts seasons",
     "db:sync:prod": "node dist/sync-database.js",
     "db:sync:force:prod": "node dist/sync-database.js --force",
     "db:sync:alter:prod": "node dist/sync-database.js --alter",
@@ -41,29 +43,33 @@
     "@nestjs/sequelize": "^10.0.0",
     "@nestjs/swagger": "^7.3.1",
     "@nestjs/throttler": "^6.4.0",
+    "@nestjs/typeorm": "^11.0.1",
+    "@sentry/nestjs": "^10.73.0",
     "@types/nodemailer-smtp-transport": "^2.7.8",
     "axios": "^1.10.0",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
+    "class-validator": "^0.15.1",
     "dotenv": "^16.4.5",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "nest-winston": "^1.9.4",
-    "nodemailer": "^6.9.8",
+    "nodemailer": "^8.0.7",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
-    "pg": "^8.11.3",
+    "pg": "^8.20.0",
     "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "sequelize": "^6.33.0",
     "sequelize-typescript": "^2.1.5",
     "swagger-ui-plugin-hierarchical-tags": "^1.0.4",
+    "typeorm": "^0.3.29",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
+    "winston-transport": "^4.7.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -112,7 +118,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   },
   "main": ".eslintrc.js",
   "keywords": []

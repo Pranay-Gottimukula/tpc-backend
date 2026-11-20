@@ -1,10 +1,14 @@
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { ThrottlerModule } from "@nestjs/throttler";
+
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+
 import { DatabaseModule } from "./db/database.module";
 import { TransactionInterceptor } from "./interceptor/TransactionInterceptor";
 import { QueryInterceptor } from "./interceptor/QueryInterceptor";
+
 import { StudentModule } from "./student/student.module";
 import { RecruiterModule } from "./recruiter/recruiter.module";
 import { TpcMemberModule } from "./tpcMember/tpcMember.module";
@@ -37,11 +41,19 @@ import { ThrottlerModule } from "@nestjs/throttler";
 import { RecruiterFeedbackModule } from "./feedback/recruiter/recruiter-feedback.module";
 import { AdminFeedbackModule } from "./feedback/admin/admin-feedback.module";
 
+import { AdminModule } from "./admin/admin.module";
+import { NoticeboardModule } from "./noticeboard/noticeboard.module";
+
+import { SentryModule } from "@sentry/nestjs/setup";
+
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot(),
+
     { module: DatabaseModule, global: true },
     { module: ServiceModule, global: true },
+
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -50,6 +62,7 @@ import { AdminFeedbackModule } from "./feedback/admin/admin-feedback.module";
         },
       ],
     }),
+
     AuthModule,
     StudentModule,
     RecruiterModule,
@@ -79,8 +92,16 @@ import { AdminFeedbackModule } from "./feedback/admin/admin-feedback.module";
     ClashesModule,
     RecruiterFeedbackModule,
     AdminFeedbackModule,
+
+    AdminModule,
+    NoticeboardModule,
   ],
   controllers: [AppController],
-  providers: [Logger, TransactionInterceptor, QueryInterceptor, AppService],
+  providers: [
+    Logger,
+    TransactionInterceptor,
+    QueryInterceptor,
+    AppService,
+  ],
 })
-export class AppModule {}
+export class AppModule { }

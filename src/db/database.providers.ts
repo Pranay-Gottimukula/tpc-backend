@@ -20,6 +20,8 @@ import {
   FacultyApprovalRequestModel,
   TpcMemberModel,
   ExternalOpportunitiesModel,
+  AdminModel,
+  NoticeboardModel,
 } from "./models";
 import { isProductionEnv } from "../utils";
 import {
@@ -73,10 +75,19 @@ export const databaseProviders = [
           acquire: 30000,
           idle: 10000,
         },
+        // ssl: true,
+        // dialectOptions: {
+        //   ssl: {
+        //     require: true,
+        //     rejectUnauthorized: false,
+        //   },
+        // },
       });
       sequelize.addModels([
         UserModel,
         StudentModel,
+        AdminModel,
+        NoticeboardModel,
         TpcMemberModel,
         RecruiterModel,
         FacultyModel,

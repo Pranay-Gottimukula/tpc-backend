@@ -133,6 +133,9 @@ export const allCourses = [
     department: DepartmentEnum.ASTRONOMY_ASTROPHYSICS_AND_SPACE_ENGINEERING,
   },
 
+  // Master of Arts (MA)
+  { course: CourseEnum.MA, branch: "English Literature & Linguistics", department: DepartmentEnum.HUMANITIES_AND_SOCIAL_SCIENCES },
+
   // Two-year Master of Science (MSc)
   { course: CourseEnum.MSC, branch: "Chemistry", department: DepartmentEnum.CHEMISTRY },
   { course: CourseEnum.MSC, branch: "Physics", department: DepartmentEnum.PHYSICS },
@@ -392,3 +395,7 @@ export const RESUME_FOLDER = path.join(env().UPLOAD_DIR, "resume");
 export const JD_FOLDER = path.join(env().UPLOAD_DIR, "jd");
 export const IE_FOLDER = path.join(env().UPLOAD_DIR, "ie");
 export const POLICY_FOLDER = path.join(env().UPLOAD_DIR, "policy");
+export const ADMIN_DAO = "ADMIN_DAO";
+export const NOTICEBOARD_DAO = "NOTICEBOARD_DAO";
+export const SEQUELIZE = "SEQUELIZE";
+export const EMAIL_CHUNK_SIZE = 80;
